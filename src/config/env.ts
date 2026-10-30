@@ -9,7 +9,8 @@ const schema = z.object({
   DB_PORT: z.coerce.number().int().min(1).max(65535),
   DB_USER: z.string().min(1),
   DB_PASSWORD: z.string(),
-  DB_NAME: z.literal("dgate_platform")
+  DB_NAME: z.string().trim().min(1)
 });
 
 export const env = schema.parse(process.env);
+
