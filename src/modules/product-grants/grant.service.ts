@@ -1,4 +1,4 @@
-﻿import { randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import type {
   ResultSetHeader,
@@ -100,7 +100,14 @@ export async function assignProductGrant(
         throw new GrantError("GRANT_ALREADY_EXISTS", 409);
       }
 
-      await connection.execute<ResultSetHeader>(
+      if (
+        input.expected_version === undefined ||
+        String(current.version_no) !== String(input.expected_version)
+      ) {
+        throw new GrantError("GRANT_VERSION_CONFLICT", 409);
+      }
+
+      const [reactivated] = await connection.execute<ResultSetHeader>(
         `
         UPDATE staff_product_grants
         SET
@@ -112,13 +119,19 @@ export async function assignProductGrant(
           version_no = version_no + 1
         WHERE id = ?
           AND status = 'REVOKED'
+          AND version_no = ?
         `,
         [
           utcSqlDate(input.expires_at),
           actorStaffId,
-          current.id
+          current.id,
+          input.expected_version
         ]
       );
+
+      if (reactivated.affectedRows !== 1) {
+        throw new GrantError("GRANT_VERSION_CONFLICT", 409);
+      }
 
       grantId = current.id;
     } else {

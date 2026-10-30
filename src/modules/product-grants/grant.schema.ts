@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const grantRoleSchema = z.enum([
   "PRODUCT_ADMIN",
@@ -14,6 +14,12 @@ export const grantCreateSchema = z.object({
   staff_public_id: z.string().uuid(),
 
   role_code: grantRoleSchema,
+
+  expected_version: z.number()
+    .int()
+    .min(1)
+    .max(Number.MAX_SAFE_INTEGER)
+    .optional(),
 
   expires_at: z.string()
     .datetime({ offset: true })

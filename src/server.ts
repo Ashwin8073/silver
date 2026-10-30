@@ -1,8 +1,8 @@
-﻿import { app } from "./app.js";
+import { app } from "./app.js";
 import { env } from "./config/env.js";
 import { pool } from "./database/pool.js";
 
-const server = app.listen(env.PORT, "127.0.0.1", () => {
+const server = app.listen(env.PORT, "0.0.0.0", () => {
   console.log(
     `D-GATE Platform API running at http://127.0.0.1:${env.PORT}`
   );

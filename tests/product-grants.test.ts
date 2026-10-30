@@ -1,4 +1,4 @@
-﻿import {
+import {
   beforeEach,
   describe,
   expect,
@@ -172,6 +172,110 @@ describe("Product grant transactions", () => {
     await expect(
       revokeProductGrant(30, 1, 1)
     ).rejects.toThrow("Audit failed");
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("Grant reactivation version protection", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+
+    mocks.getConnection.mockResolvedValue({
+      execute: mocks.execute,
+      beginTransaction: mocks.beginTransaction,
+      commit: mocks.commit,
+      rollback: mocks.rollback,
+      release: mocks.release
+    });
+  });
+
+  function mockExistingRevokedGrant(version: number) {
+    mocks.execute
+      .mockResolvedValueOnce([[{ id: 10 }], []])
+      .mockResolvedValueOnce([[{ id: 20 }], []])
+      .mockResolvedValueOnce([[
+        {
+          id: 30,
+          status: "REVOKED",
+          version_no: version
+        }
+      ], []]);
+  }
+
+  it("rejects reactivation without expected version", async () => {
+    mockExistingRevokedGrant(2);
+
+    await expect(
+      assignProductGrant(input, 1)
+    ).rejects.toMatchObject({
+      code: "GRANT_VERSION_CONFLICT",
+      httpStatus: 409
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rejects stale reactivation versions", async () => {
+    mockExistingRevokedGrant(3);
+
+    await expect(
+      assignProductGrant({
+        ...input,
+        expected_version: 2
+      }, 1)
+    ).rejects.toMatchObject({
+      code: "GRANT_VERSION_CONFLICT",
+      httpStatus: 409
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+  });
+
+  it("reactivates with matching version and audit", async () => {
+    mockExistingRevokedGrant(2);
+
+    mocks.execute
+      .mockResolvedValueOnce([{ affectedRows: 1 }, []])
+      .mockResolvedValueOnce([{ affectedRows: 1 }, []]);
+
+    const result = await assignProductGrant({
+      ...input,
+      expected_version: 2
+    }, 1);
+
+    expect(result).toEqual({
+      grant_id: 30,
+      status: "ACTIVE"
+    });
+
+    const [sql, params] = mocks.execute.mock.calls[3];
+
+    expect(sql).toContain("AND version_no = ?");
+    expect(params[3]).toBe(2);
+
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+
+  it("rolls back when versioned update affects no rows", async () => {
+    mockExistingRevokedGrant(2);
+
+    mocks.execute.mockResolvedValueOnce([
+      { affectedRows: 0 },
+      []
+    ]);
+
+    await expect(
+      assignProductGrant({
+        ...input,
+        expected_version: 2
+      }, 1)
+    ).rejects.toMatchObject({
+      code: "GRANT_VERSION_CONFLICT"
+    });
 
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
