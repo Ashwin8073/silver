@@ -1,4 +1,4 @@
-﻿import { randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { ResultSetHeader } from "mysql2";
 
 import { pool } from "../../database/pool.js";
@@ -71,8 +71,6 @@ export async function createProduct(
     );
 
     await connection.commit();
-
-    return await getProduct(input.product_code);
   } catch (error) {
     await connection.rollback();
 
@@ -89,4 +87,6 @@ export async function createProduct(
   } finally {
     connection.release();
   }
+
+  return await getProduct(input.product_code);
 }
