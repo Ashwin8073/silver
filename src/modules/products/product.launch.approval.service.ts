@@ -3,6 +3,9 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { pool } from "../../database/pool.js";
 import {
+  verifyLaunchRequestIntegrity
+} from "./product.launch.request-integrity.js";
+import {
   evaluateLaunchApprovalAction
 } from "./product.launch.approval-policy.js";
 
@@ -17,7 +20,10 @@ interface ProductRow extends RowDataPacket {
 }
 
 interface ApprovalRow
-  extends RowDataPacket, LaunchApprovalRequest {}
+  extends RowDataPacket, LaunchApprovalRequest {
+  request_body_json: string;
+  request_sha256: string;
+}
 
 export type ApprovalTransactionOutcome =
   | { status: "RECORDED"; decision: "APPROVED" | "REJECTED" }
@@ -79,7 +85,8 @@ export async function recordLaunchApprovalDecision(
       [
         "SELECT id, product_id, operation_code,",
         "  target_type, status,",
-        "  requested_by_staff_id, expires_at",
+        "  requested_by_staff_id, expires_at,",
+        "  request_body_json, request_sha256",
         "FROM platform_change_requests",
         "WHERE public_id = ? AND product_id = ?",
         "FOR UPDATE"
@@ -93,6 +100,22 @@ export async function recordLaunchApprovalDecision(
       await connection.rollback();
       transactionActive = false;
       return { status: "NOT_FOUND" };
+    }
+
+    const integrity = verifyLaunchRequestIntegrity(
+      approvalRequest.request_body_json,
+      approvalRequest.request_sha256,
+      productCode
+    );
+
+    if (!integrity.valid) {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "DENIED",
+        reason: integrity.reason
+      };
     }
 
     const decision = evaluateLaunchApprovalAction(

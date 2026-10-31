@@ -25,9 +25,21 @@ import {
   recordLaunchApprovalDecision
 } from "../src/modules/products/product.launch.approval.service.js";
 
+import {
+  hashLaunchRequestBody
+} from "../src/modules/products/product.launch.request-integrity.js";
+
 const publicId = "12345678-1234-1234-1234-123456789abc";
 
+const launchBody = JSON.stringify({
+  schema_version: 1,
+  product_code: "TEST_PRODUCT",
+  configuration_sha256: "a".repeat(64)
+});
+
 const approvalRequest = {
+  request_body_json: launchBody,
+  request_sha256: hashLaunchRequestBody(launchBody),
   id: 8,
   product_id: 25,
   operation_code: "PRODUCT_LAUNCH",
@@ -185,5 +197,88 @@ describe("Launch approval transaction", () => {
       reason: "SUPER_ADMIN_REQUIRED"
     });
     expect(mocks.getConnection).not.toHaveBeenCalled();
+  });
+  it("rejects a tampered request and rolls back", async () => {
+    setup({
+      ...approvalRequest,
+      request_body_json: launchBody.replace(
+        "TEST_PRODUCT",
+        "OTHER_PRODUCT"
+      )
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "REQUEST_HASH_MISMATCH"
+    });
+
+    expect(mocks.execute).toHaveBeenCalledTimes(2);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed stored request JSON", async () => {
+    const invalidBody = '{"schema_version":';
+
+    setup({
+      ...approvalRequest,
+      request_body_json: invalidBody,
+      request_sha256: hashLaunchRequestBody(invalidBody)
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "INVALID_REQUEST_JSON"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rejects a request for another product", async () => {
+    const otherBody = JSON.stringify({
+      schema_version: 1,
+      product_code: "OTHER_PRODUCT",
+      configuration_sha256: "a".repeat(64)
+    });
+
+    setup({
+      ...approvalRequest,
+      request_body_json: otherBody,
+      request_sha256: hashLaunchRequestBody(otherBody)
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "REQUEST_PRODUCT_MISMATCH"
+    });
+
+    expect(mocks.execute).toHaveBeenCalledTimes(2);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
   });
 });
