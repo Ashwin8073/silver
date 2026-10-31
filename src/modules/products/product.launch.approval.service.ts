@@ -23,7 +23,10 @@ interface ProductRow extends RowDataPacket {
 }
 
 interface ApprovalRow
-  extends RowDataPacket, LaunchApprovalRequest {
+  extends RowDataPacket,
+    Omit<LaunchApprovalRequest, "expires_at"> {
+  expires_at: string | null;
+  expiry_state: "NONE" | "VALID" | "EXPIRED";
   request_body_json: string;
   request_sha256: string;
 }
@@ -94,7 +97,14 @@ export async function recordLaunchApprovalDecision(
       [
         "SELECT id, product_id, operation_code,",
         "  target_type, status,",
-        "  requested_by_staff_id, expires_at,",
+        "  requested_by_staff_id,",
+        "  DATE_FORMAT(expires_at,",
+        "    '%Y-%m-%dT%H:%i:%s.%fZ') AS expires_at,",
+        "  CASE",
+        "    WHEN expires_at IS NULL THEN 'NONE'",
+        "    WHEN expires_at > UTC_TIMESTAMP(6) THEN 'VALID'",
+        "    ELSE 'EXPIRED'",
+        "  END AS expiry_state,",
         "  request_body_json, request_sha256",
         "FROM platform_change_requests",
         "WHERE public_id = ? AND product_id = ?",
@@ -124,6 +134,57 @@ export async function recordLaunchApprovalDecision(
       return {
         status: "DENIED",
         reason: integrity.reason
+      };
+    }
+
+    const expiryText = approvalRequest.expires_at;
+    const expiryState = approvalRequest.expiry_state;
+
+    const validExpiryFormat =
+      expiryText === null ||
+      (
+        typeof expiryText === "string" &&
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(
+          expiryText
+        ) &&
+        Number.isFinite(Date.parse(expiryText))
+      );
+
+    if (!validExpiryFormat) {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "DENIED",
+        reason: "INVALID_EXPIRY"
+      };
+    }
+
+    const validExpiryState =
+      expiryText === null
+        ? expiryState === "NONE"
+        : (
+            expiryState === "VALID" ||
+            expiryState === "EXPIRED"
+          );
+
+    if (!validExpiryState) {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "DENIED",
+        reason: "INVALID_EXPIRY_STATE"
+      };
+    }
+
+    if (expiryState === "EXPIRED") {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "DENIED",
+        reason: "REQUEST_EXPIRED"
       };
     }
 
@@ -162,8 +223,13 @@ export async function recordLaunchApprovalDecision(
       }
     }
 
+
     const decision = evaluateLaunchApprovalAction(
-      approvalRequest,
+      {
+        ...approvalRequest,
+        // MariaDB has already checked expiry at microsecond precision.
+        expires_at: null
+      },
       {
         actor_staff_id: actorStaffId,
         actor_roles: actorRoles,
@@ -192,7 +258,9 @@ export async function recordLaunchApprovalDecision(
         "    WHEN ? = 'APPROVED' THEN UTC_TIMESTAMP(6)",
         "    ELSE NULL END",
         "WHERE id = ? AND product_id = ?",
-        "  AND status = 'PENDING'"
+        "  AND status = 'PENDING'",
+        "  AND (expires_at IS NULL",
+        "    OR expires_at > UTC_TIMESTAMP(6))"
       ].join("\n"),
       [
         decision.next_status,

@@ -52,7 +52,8 @@ const approvalRequest = {
   target_type: "PRODUCT",
   status: "PENDING",
   requested_by_staff_id: 1,
-  expires_at: null
+  expires_at: null as string | null,
+  expiry_state: "NONE" as "NONE" | "VALID" | "EXPIRED"
 };
 
 function setup(
@@ -490,5 +491,185 @@ describe("Launch approval transaction", () => {
     expect(mocks.commit).not.toHaveBeenCalled();
     expect(mocks.rollback).not.toHaveBeenCalled();
     expect(mocks.release).toHaveBeenCalledOnce();
+  });
+  it("requests UTC-formatted expiry from MariaDB", async () => {
+    setup();
+
+    await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "REJECT",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    const [requestSql] = mocks.execute.mock.calls[1]!;
+
+    expect(requestSql).toContain(
+      "DATE_FORMAT(expires_at,"
+    );
+
+    expect(requestSql).toContain(
+      "AS expires_at"
+    );
+  });
+
+  it("rejects an expired UTC launch request", async () => {
+    setup({
+      ...approvalRequest,
+      expires_at: "2020-01-01T00:00:00.000000Z",
+      expiry_state: "EXPIRED"
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "REQUEST_EXPIRED"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed UTC expiry values", async () => {
+    setup({
+      ...approvalRequest,
+      expires_at: "invalid-date"
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "INVALID_EXPIRY"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+  it("uses MariaDB microsecond expiry state", async () => {
+    setup({
+      ...approvalRequest,
+      expires_at: "2099-01-01T00:00:00.000456Z",
+      expiry_state: "VALID"
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "RECORDED",
+      decision: "APPROVED"
+    });
+
+    const [requestSql] = mocks.execute.mock.calls[1]!;
+
+    expect(requestSql).toContain(
+      "expires_at > UTC_TIMESTAMP(6)"
+    );
+
+    expect(requestSql).toContain(
+      "END AS expiry_state"
+    );
+
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+
+  it("rejects expired state regardless of JavaScript rounding", async () => {
+    setup({
+      ...approvalRequest,
+      expires_at: "2099-01-01T00:00:00.000456Z",
+      expiry_state: "EXPIRED"
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "REQUEST_EXPIRED"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid expiry state and rechecks expiry at update", async () => {
+    setup({
+      ...approvalRequest,
+      expires_at: "2099-01-01T00:00:00.000456Z",
+      expiry_state: "NONE"
+    });
+
+    const denied = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(denied).toEqual({
+      status: "DENIED",
+      reason: "INVALID_EXPIRY_STATE"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+
+    vi.resetAllMocks();
+
+    mocks.query.mockResolvedValue([[], []]);
+
+    mocks.readSnapshotHash.mockResolvedValue({
+      hash: "a".repeat(64),
+      assessment: {
+        configuration_checks_passed: true,
+        approval_eligible: false,
+        activation_enabled: false,
+        blockers: []
+      }
+    });
+
+    setup();
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result.status).toBe("RECORDED");
+
+    const [updateSql] = mocks.execute.mock.calls[2]!;
+
+    expect(updateSql).toContain(
+      "expires_at > UTC_TIMESTAMP(6)"
+    );
   });
 });
