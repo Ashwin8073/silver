@@ -1,4 +1,7 @@
 import {
+  evaluateProductReadiness
+} from "./product.readiness.js";
+import {
   getProductLaunchOverview
 } from "./product.launch.service.js";
 import { Router } from "express";
@@ -9,7 +12,7 @@ import {
 } from "../auth/staff-auth.middleware.js";
 
 import type {
-  StaffContext
+  StaffContex
 } from "../auth/staff-auth.middleware.js";
 
 import {
@@ -37,7 +40,7 @@ import {
 } from "./product.service.js";
 
 import {
-  updateDraftProduct
+  updateDraftProduc
 } from "./product.update.service.js";
 
 export const productsRouter = Router();
@@ -137,6 +140,7 @@ productsRouter.get(
         product_code: product.product_code,
         product_status: product.status,
         overview,
+        readiness: evaluateProductReadiness(overview),
         activation_enabled: false
       });
     } catch (error) {
@@ -189,7 +193,7 @@ productsRouter.get(
 
       res.status(200).json({
         success: true,
-        data: product
+        data: produc
       });
     } catch (error) {
       next(error);
@@ -222,7 +226,7 @@ productsRouter.post(
 
       res.status(201).json({
         success: true,
-        data: product
+        data: produc
       });
     } catch (error) {
       if (error instanceof ProductConflictError) {
