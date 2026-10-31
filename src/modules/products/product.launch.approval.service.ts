@@ -3,6 +3,9 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { pool } from "../../database/pool.js";
 import {
+  verifyLaunchApproverAuthority
+} from "./product.launch.approval-authority.js";
+import {
   readAssessedLaunchConfiguration
 } from "./product.launch.approval-readiness.js";
 import {
@@ -91,6 +94,22 @@ export async function recordLaunchApprovalDecision(
       await connection.rollback();
       transactionActive = false;
       return { status: "NOT_FOUND" };
+    }
+
+    const authorizedApprover =
+      await verifyLaunchApproverAuthority(
+        connection,
+        actorStaffId
+      );
+
+    if (!authorizedApprover) {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "DENIED",
+        reason: "STAFF_APPROVAL_AUTHORITY_REVOKED"
+      };
     }
 
     const [requests] = await connection.execute<ApprovalRow[]>(

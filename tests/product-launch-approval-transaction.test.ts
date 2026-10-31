@@ -14,7 +14,8 @@ const mocks = vi.hoisted(() => ({
   commit: vi.fn(),
   rollback: vi.fn(),
   release: vi.fn(),
-  readSnapshotHash: vi.fn()
+  readSnapshotHash: vi.fn(),
+  verifyAuthority: vi.fn()
 }));
 
 vi.mock("../src/database/pool.js", () => ({
@@ -25,6 +26,10 @@ vi.mock("../src/database/pool.js", () => ({
 
 vi.mock("../src/modules/products/product.launch.approval-readiness.js", () => ({
   readAssessedLaunchConfiguration: mocks.readSnapshotHash
+}));
+
+vi.mock("../src/modules/products/product.launch.approval-authority.js", () => ({
+  verifyLaunchApproverAuthority: mocks.verifyAuthority
 }));
 
 import {
@@ -79,6 +84,8 @@ function setup(
 describe("Launch approval transaction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+
+    mocks.verifyAuthority.mockResolvedValue(true);
 
     mocks.query.mockResolvedValue([[], []]);
 
@@ -642,6 +649,7 @@ describe("Launch approval transaction", () => {
 
     vi.resetAllMocks();
 
+    mocks.verifyAuthority.mockResolvedValue(true);
     mocks.query.mockResolvedValue([[], []]);
 
     mocks.readSnapshotHash.mockResolvedValue({
@@ -671,5 +679,79 @@ describe("Launch approval transaction", () => {
     expect(updateSql).toContain(
       "expires_at > UTC_TIMESTAMP(6)"
     );
+  });
+  it("denies approval when database authority was revoked", async () => {
+    setup();
+
+    mocks.verifyAuthority.mockResolvedValueOnce(false);
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "STAFF_APPROVAL_AUTHORITY_REVOKED"
+    });
+
+    expect(mocks.verifyAuthority).toHaveBeenCalledWith(
+      expect.objectContaining({
+        execute: mocks.execute
+      }),
+      2
+    );
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("denies rejection when database authority was revoked", async () => {
+    setup();
+
+    mocks.verifyAuthority.mockResolvedValueOnce(false);
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "REJECT",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "STAFF_APPROVAL_AUTHORITY_REVOKED"
+    });
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("rolls back when staff authority query fails", async () => {
+    setup();
+
+    mocks.verifyAuthority.mockRejectedValueOnce(
+      new Error("STAFF_AUTHORITY_QUERY_FAILED")
+    );
+
+    await expect(
+      recordLaunchApprovalDecision(
+        "TEST_PRODUCT",
+        publicId,
+        "APPROVE",
+        2,
+        ["SUPER_ADMIN"]
+      )
+    ).rejects.toThrow("STAFF_AUTHORITY_QUERY_FAILED");
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
   });
 });
