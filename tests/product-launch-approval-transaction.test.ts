@@ -22,8 +22,8 @@ vi.mock("../src/database/pool.js", () => ({
   }
 }));
 
-vi.mock("../src/modules/products/product.launch.snapshot.repository.js", () => ({
-  readLaunchConfigurationHash: mocks.readSnapshotHash
+vi.mock("../src/modules/products/product.launch.approval-readiness.js", () => ({
+  readAssessedLaunchConfiguration: mocks.readSnapshotHash
 }));
 
 import {
@@ -76,9 +76,15 @@ function setup(
 describe("Launch approval transaction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    mocks.readSnapshotHash.mockResolvedValue(
-      "a".repeat(64)
-    );
+    mocks.readSnapshotHash.mockResolvedValue({
+      hash: "a".repeat(64),
+      assessment: {
+        configuration_checks_passed: true,
+        approval_eligible: false,
+        activation_enabled: false,
+        blockers: []
+      }
+    });
   });
 
   it("approves and audits in one transaction", async () => {
@@ -292,9 +298,15 @@ describe("Launch approval transaction", () => {
   it("rejects an outdated configuration fingerprint", async () => {
     setup();
 
-    mocks.readSnapshotHash.mockResolvedValueOnce(
-      "b".repeat(64)
-    );
+    mocks.readSnapshotHash.mockResolvedValueOnce({
+      hash: "b".repeat(64),
+      assessment: {
+        configuration_checks_passed: true,
+        approval_eligible: false,
+        activation_enabled: false,
+        blockers: []
+      }
+    });
 
     const result = await recordLaunchApprovalDecision(
       "TEST_PRODUCT",
@@ -340,8 +352,69 @@ describe("Launch approval transaction", () => {
   it("permits rejection even when configuration is stale", async () => {
     setup();
 
-    mocks.readSnapshotHash.mockResolvedValueOnce(
-      "b".repeat(64)
+    mocks.readSnapshotHash.mockResolvedValueOnce({
+      hash: "b".repeat(64),
+      assessment: {
+        configuration_checks_passed: true,
+        approval_eligible: false,
+        activation_enabled: false,
+        blockers: []
+      }
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "REJECT",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "RECORDED",
+      decision: "REJECTED"
+    });
+
+    expect(mocks.readSnapshotHash).not.toHaveBeenCalled();
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+  it("denies approval when readiness checks fail", async () => {
+    setup();
+
+    mocks.readSnapshotHash.mockResolvedValueOnce({
+      hash: "a".repeat(64),
+      assessment: {
+        configuration_checks_passed: false,
+        approval_eligible: false,
+        activation_enabled: false,
+        blockers: ["NO_ACTIVE_PLAN"]
+      }
+    });
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "LAUNCH_CONFIGURATION_NOT_READY"
+    });
+
+    expect(mocks.execute).toHaveBeenCalledTimes(2);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("allows rejection without requiring launch readiness", async () => {
+    setup();
+
+    mocks.readSnapshotHash.mockRejectedValueOnce(
+      new Error("SNAPSHOT_SHOULD_NOT_BE_READ")
     );
 
     const result = await recordLaunchApprovalDecision(

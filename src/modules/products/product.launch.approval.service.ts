@@ -3,8 +3,8 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { pool } from "../../database/pool.js";
 import {
-  readLaunchConfigurationHash
-} from "./product.launch.snapshot.repository.js";
+  readAssessedLaunchConfiguration
+} from "./product.launch.approval-readiness.js";
 import {
   verifyLaunchRequestIntegrity
 } from "./product.launch.request-integrity.js";
@@ -122,14 +122,15 @@ export async function recordLaunchApprovalDecision(
     }
 
     if (action === "APPROVE") {
-      const currentConfigurationHash =
-        await readLaunchConfigurationHash(
+      const currentConfiguration =
+        await readAssessedLaunchConfiguration(
           connection,
-          product.id
+          product.id,
+          new Date()
         );
 
       if (
-        currentConfigurationHash !==
+        currentConfiguration.hash !==
         integrity.body.configuration_sha256
       ) {
         await connection.rollback();
@@ -138,6 +139,19 @@ export async function recordLaunchApprovalDecision(
         return {
           status: "DENIED",
           reason: "STALE_PRODUCT_CONFIGURATION"
+        };
+      }
+
+      if (
+        !currentConfiguration.assessment
+          .configuration_checks_passed
+      ) {
+        await connection.rollback();
+        transactionActive = false;
+
+        return {
+          status: "DENIED",
+          reason: "LAUNCH_CONFIGURATION_NOT_READY"
         };
       }
     }
