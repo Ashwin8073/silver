@@ -18,7 +18,7 @@ import {
 } from "../auth/staff-auth.middleware.js";
 
 import type {
-  StaffContex
+  StaffContext
 } from "../auth/staff-auth.middleware.js";
 
 import {
@@ -46,7 +46,7 @@ import {
 } from "./product.service.js";
 
 import {
-  updateDraftProduc
+  updateDraftProduct
 } from "./product.update.service.js";
 
 export const productsRouter = Router();
@@ -205,7 +205,7 @@ productsRouter.get(
 
       res.status(200).json({
         success: true,
-        data: produc
+        data: product
       });
     } catch (error) {
       next(error);
@@ -238,7 +238,7 @@ productsRouter.post(
 
       res.status(201).json({
         success: true,
-        data: produc
+        data: product
       });
     } catch (error) {
       if (error instanceof ProductConflictError) {
