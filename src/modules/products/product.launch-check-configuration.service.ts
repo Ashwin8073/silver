@@ -1,3 +1,6 @@
+import {
+  hasApprovedLaunchRequest
+} from "./product.approved-configuration-guard.js";
 import { createHash, randomUUID } from "node:crypto";
 
 import type {
@@ -295,6 +298,18 @@ export async function recordProductLaunchCheck(
 
       return {
         status: "STAFF_FORBIDDEN"
+      };
+    }
+
+    if (await hasApprovedLaunchRequest(
+      connection,
+      product.id
+    )) {
+      await connection.rollback();
+      transactionActive = false;
+
+      return {
+        status: "PRODUCT_NOT_EDITABLE"
       };
     }
 

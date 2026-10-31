@@ -1,4 +1,14 @@
 import {
+  hasApprovedLaunchRequest
+} from "../src/modules/products/product.approved-configuration-guard.js";
+vi.mock(
+  "../src/modules/products/product.approved-configuration-guard.js",
+  () => ({
+    hasApprovedLaunchRequest:
+      vi.fn().mockResolvedValue(false)
+  })
+);
+import {
   beforeEach,
   describe,
   expect,
@@ -60,6 +70,8 @@ function draftProduct() {
 describe("Internal readiness transitions", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(false);
     setup();
   });
 
@@ -271,6 +283,52 @@ describe("Internal readiness transitions", () => {
       )
     ).rejects.toThrow("AUDIT_FAILED");
 
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+  it("blocks plan activation after launch approval", async () => {
+    draftProduct();
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await activateDraftPlanConfiguration(
+      "TEST_PRODUCT",
+      "SILVER",
+      2
+    );
+
+    expect(result).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("blocks integration enablement after approval", async () => {
+    draftProduct();
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await enableProductIntegrationConfiguration(
+      "TEST_PRODUCT",
+      2
+    );
+
+    expect(result).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
   });

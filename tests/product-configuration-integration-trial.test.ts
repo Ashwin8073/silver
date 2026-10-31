@@ -1,4 +1,14 @@
 import {
+  hasApprovedLaunchRequest
+} from "../src/modules/products/product.approved-configuration-guard.js";
+vi.mock(
+  "../src/modules/products/product.approved-configuration-guard.js",
+  () => ({
+    hasApprovedLaunchRequest:
+      vi.fn().mockResolvedValue(false)
+  })
+);
+import {
   beforeEach,
   describe,
   expect,
@@ -83,6 +93,8 @@ function mockDraftProduct(): void {
 describe("Product integrations and trial configuration", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(false);
     setup();
   });
 
@@ -328,6 +340,51 @@ describe("Product integrations and trial configuration", () => {
     );
 
     expect(result.status).toBe("CONFLICT");
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+  it("blocks integration registration after approval", async () => {
+    mockDraftProduct();
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await registerProductIntegration(
+      integrationInput,
+      2
+    );
+
+    expect(result.status).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("blocks trial changes after approval", async () => {
+    mockDraftProduct();
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await configureProductTrialPolicy(
+      trialInput,
+      2
+    );
+
+    expect(result.status).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
   });

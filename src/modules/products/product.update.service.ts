@@ -1,4 +1,7 @@
-﻿import { randomUUID } from "node:crypto";
+import {
+  hasApprovedLaunchRequest
+} from "./product.approved-configuration-guard.js";
+import { randomUUID } from "node:crypto";
 import type { RowDataPacket } from "mysql2";
 
 import { pool } from "../../database/pool.js";
@@ -89,6 +92,15 @@ export async function updateDraftProduct(
       return "NOT_EDITABLE";
     }
 
+    if (await hasApprovedLaunchRequest(
+      connection,
+      product.id
+    )) {
+      await connection.rollback();
+      transactionActive = false;
+      return "NOT_EDITABLE";
+    }
+
     const changes = editableFields.flatMap(field => {
       const value = input[field];
 
@@ -167,5 +179,3 @@ export async function updateDraftProduct(
     connection.release();
   }
 }
-
-

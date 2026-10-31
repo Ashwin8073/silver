@@ -1,4 +1,14 @@
-﻿import {
+import {
+  hasApprovedLaunchRequest
+} from "../src/modules/products/product.approved-configuration-guard.js";
+vi.mock(
+  "../src/modules/products/product.approved-configuration-guard.js",
+  () => ({
+    hasApprovedLaunchRequest:
+      vi.fn().mockResolvedValue(false)
+  })
+);
+import {
   beforeEach,
   describe,
   expect,
@@ -37,6 +47,8 @@ import {
 describe("Transactional DRAFT product updates", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(false);
 
     mocks.getConnection.mockResolvedValue({
       execute: mocks.execute,
@@ -190,5 +202,32 @@ describe("Transactional DRAFT product updates", () => {
     expect(grantCall[0]).toContain("FOR UPDATE");
     expect(grantCall[1]).toEqual([2, 10]);
     expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+  it("blocks product edits after launch approval", async () => {
+    mocks.execute.mockResolvedValueOnce([
+      [{ id: 10, status: "DRAFT" }],
+      []
+    ]);
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await updateDraftProduct(
+      "TEST_PRODUCT",
+      { product_name: "Changed After Approval" },
+      1,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toBe("NOT_EDITABLE");
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
   });
 });

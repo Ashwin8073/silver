@@ -1,4 +1,14 @@
 import {
+  hasApprovedLaunchRequest
+} from "../src/modules/products/product.approved-configuration-guard.js";
+vi.mock(
+  "../src/modules/products/product.approved-configuration-guard.js",
+  () => ({
+    hasApprovedLaunchRequest:
+      vi.fn().mockResolvedValue(false)
+  })
+);
+import {
   beforeEach,
   describe,
   expect,
@@ -76,6 +86,8 @@ function setup() {
 describe("Draft product plans and pricing", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(false);
     setup();
   });
 
@@ -268,5 +280,56 @@ describe("Draft product plans and pricing", () => {
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
     expect(mocks.release).toHaveBeenCalledOnce();
+  });
+  it("blocks creating a plan after launch approval", async () => {
+    mocks.execute.mockResolvedValueOnce([
+      [{ id: 10, status: "DRAFT" }],
+      []
+    ]);
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await createDraftPlan(
+      planInput,
+      2
+    );
+
+    expect(result.status).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
+
+  it("blocks creating a price after launch approval", async () => {
+    mocks.execute.mockResolvedValueOnce([
+      [{ id: 10, status: "DRAFT" }],
+      []
+    ]);
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await createDraftPlanPrice(
+      priceInput,
+      2
+    );
+
+    expect(result.status).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
   });
 });

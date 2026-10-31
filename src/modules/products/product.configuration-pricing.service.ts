@@ -1,3 +1,6 @@
+import {
+  hasApprovedLaunchRequest
+} from "./product.approved-configuration-guard.js";
 import { randomUUID } from "node:crypto";
 
 import type {
@@ -306,6 +309,15 @@ async function lockEditableProduct(
   if (!authorized) {
     return {
       status: "STAFF_FORBIDDEN"
+    };
+  }
+
+  if (await hasApprovedLaunchRequest(
+    connection,
+    product.id
+  )) {
+    return {
+      status: "PRODUCT_NOT_EDITABLE"
     };
   }
 

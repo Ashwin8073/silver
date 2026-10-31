@@ -1,4 +1,14 @@
 import {
+  hasApprovedLaunchRequest
+} from "../src/modules/products/product.approved-configuration-guard.js";
+vi.mock(
+  "../src/modules/products/product.approved-configuration-guard.js",
+  () => ({
+    hasApprovedLaunchRequest:
+      vi.fn().mockResolvedValue(false)
+  })
+);
+import {
   beforeEach,
   describe,
   expect,
@@ -75,6 +85,8 @@ function mockDraftProduct(): void {
 describe("Product launch check configuration", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(false);
     setup();
   });
 
@@ -398,5 +410,28 @@ describe("Product launch check configuration", () => {
 
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
+  });
+  it("blocks launch-check evidence changes after approval", async () => {
+    mockDraftProduct();
+
+    vi.mocked(hasApprovedLaunchRequest)
+      .mockResolvedValue(true);
+
+    const result = await recordProductLaunchCheck(
+      baseInput,
+      2
+    );
+
+    expect(result.status).toBe(
+      "PRODUCT_NOT_EDITABLE"
+    );
+
+    expect(hasApprovedLaunchRequest)
+      .toHaveBeenCalledOnce();
+
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
   });
 });
