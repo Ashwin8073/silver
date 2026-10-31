@@ -1,4 +1,7 @@
 import {
+  getMandatoryLaunchChecklist
+} from "./product.launch.checklist.js";
+import {
   evaluateLaunchEligibility
 } from "./product.launch.eligibility.js";
 import {
@@ -145,12 +148,16 @@ productsRouter.get(
         product.id
       );
 
+      const mandatoryChecklist =
+        await getMandatoryLaunchChecklist(product.id);
+
       res.status(200).json({
         success: true,
         product_code: product.product_code,
         product_status: product.status,
         overview,
         evidence,
+        mandatory_checklist: mandatoryChecklist,
         launch_eligibility: evaluateLaunchEligibility(evidence),
         readiness: evaluateProductReadiness(overview),
         activation_enabled: false

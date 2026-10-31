@@ -1,4 +1,4 @@
-﻿import "dotenv/config";
+import "dotenv/config";
 
 import request from "supertest";
 import { describe, expect, it } from "vitest";
@@ -15,7 +15,8 @@ describe("Backend HTTP security", () => {
     "/staff/auth/me",
     "/staff/auth/super-admin-check",
     "/staff/products",
-    "/staff/products/TEST_PRODUCT"
+    "/staff/products/TEST_PRODUCT",
+    "/staff/products/TEST_PRODUCT/launch-overview"
   ])("rejects anonymous GET %s", async (path) => {
     const response = await request(app)
       .get(`${prefix}${path}`);

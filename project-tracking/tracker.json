@@ -3,12 +3,12 @@
     "code":  "DGP-API",
     "baseline":  "1.0",
     "baseline_complete":  false,
-    "last_completed_step":  "29.9",
-    "current_step":  "29.10",
+    "last_completed_step":  "29.17",
+    "current_step":  "29.18",
     "test_results":  {
-                         "passed":  92,
+                         "passed":  100,
                          "failed":  0,
-                         "test_files":  11
+                         "test_files":  12
                      },
     "features":  [
                      {
