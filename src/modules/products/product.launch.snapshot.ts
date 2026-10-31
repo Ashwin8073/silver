@@ -14,7 +14,7 @@ export interface LaunchConfigurationSnapshot {
     plan_code: string;
     plan_name: string;
     status: string;
-    tier_rank: number;
+    tier_rank: number | null;
     prices: Array<{
       currency: string;
       billing_interval: string;

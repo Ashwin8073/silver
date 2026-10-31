@@ -188,4 +188,51 @@ describe("MySQL launch configuration snapshot reader", () => {
 
     expect(mocks.execute).not.toHaveBeenCalled();
   });
+  it("supports nullable plan tier ranks", async () => {
+    mockSnapshot({
+      plans: [{
+        ...plan,
+        tier_rank: null
+      }]
+    });
+
+    const result = await readLaunchConfigurationSnapshot(
+      connection,
+      25
+    );
+
+    expect(result.plans[0]?.tier_rank).toBeNull();
+  });
+
+  it("rejects invalid trial enabled flags", async () => {
+    mockSnapshot({
+      policies: [{
+        enabled: 2,
+        trial_days: 0
+      }]
+    });
+
+    await expect(
+      readLaunchConfigurationSnapshot(
+        connection,
+        25
+      )
+    ).rejects.toThrow(
+      "INVALID_SNAPSHOT_BOOLEAN:trial_enabled"
+    );
+  });
+  it("uses exclusive row locks for every snapshot query", async () => {
+    mockSnapshot();
+
+    await readLaunchConfigurationSnapshot(
+      connection,
+      25
+    );
+
+    expect(mocks.execute).toHaveBeenCalledTimes(6);
+
+    for (const [sql] of mocks.execute.mock.calls) {
+      expect(sql).toContain("FOR UPDATE");
+    }
+  });
 });

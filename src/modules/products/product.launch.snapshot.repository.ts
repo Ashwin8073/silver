@@ -23,7 +23,7 @@ interface PlanDbRow extends RowDataPacket {
   plan_code: string;
   plan_name: string;
   status: string;
-  tier_rank: number | string;
+  tier_rank: number | string | null;
 }
 
 interface PriceDbRow extends RowDataPacket {
@@ -86,6 +86,21 @@ function safeInteger(
   return result;
 }
 
+function safeBooleanFlag(
+  value: unknown,
+  label: string
+): boolean {
+  const flag = safeInteger(value, label);
+
+  if (flag !== 0 && flag !== 1) {
+    throw new Error(
+      "INVALID_SNAPSHOT_BOOLEAN:" + label
+    );
+  }
+
+  return flag === 1;
+}
+
 function dateText(
   value: unknown,
   label: string
@@ -127,7 +142,8 @@ export async function readLaunchConfigurationSnapshot(
       "SELECT product_code, product_name, status,",
       "  provisioning_mode, application_url, onboarding_url",
       "FROM products",
-      "WHERE id = ?"
+      "WHERE id = ?",
+      "FOR UPDATE"
     ].join("\n"),
     [productId]
   );
@@ -142,7 +158,8 @@ export async function readLaunchConfigurationSnapshot(
     [
       "SELECT id, plan_code, plan_name, status, tier_rank",
       "FROM plans",
-      "WHERE product_id = ?"
+      "WHERE product_id = ?",
+      "FOR UPDATE"
     ].join("\n"),
     [productId]
   );
@@ -157,7 +174,8 @@ export async function readLaunchConfigurationSnapshot(
       "    '%Y-%m-%dT%H:%i:%s.%fZ') AS valid_until",
       "FROM plan_prices pp",
       "JOIN plans p ON p.id = pp.plan_id",
-      "WHERE p.product_id = ?"
+      "WHERE p.product_id = ?",
+      "FOR UPDATE"
     ].join("\n"),
     [productId]
   );
@@ -168,7 +186,8 @@ export async function readLaunchConfigurationSnapshot(
         "SELECT integration_code, api_audience,",
         "  status, secret_reference",
         "FROM product_integrations",
-        "WHERE product_id = ?"
+        "WHERE product_id = ?",
+      "FOR UPDATE"
       ].join("\n"),
       [productId]
     );
@@ -177,7 +196,8 @@ export async function readLaunchConfigurationSnapshot(
     [
       "SELECT enabled, trial_days",
       "FROM trial_policies",
-      "WHERE product_id = ?"
+      "WHERE product_id = ?",
+      "FOR UPDATE"
     ].join("\n"),
     [productId]
   );
@@ -190,7 +210,8 @@ export async function readLaunchConfigurationSnapshot(
       "    '%Y-%m-%dT%H:%i:%s.%fZ') AS verified_at,",
       "  details_json",
       "FROM product_launch_checks",
-      "WHERE product_id = ?"
+      "WHERE product_id = ?",
+      "FOR UPDATE"
     ].join("\n"),
     [productId]
   );
@@ -255,10 +276,12 @@ export async function readLaunchConfigurationSnapshot(
       plan_code: plan.plan_code,
       plan_name: plan.plan_name,
       status: plan.status,
-      tier_rank: safeInteger(
-        plan.tier_rank,
-        "tier_rank"
-      ),
+      tier_rank: plan.tier_rank === null
+        ? null
+        : safeInteger(
+            plan.tier_rank,
+            "tier_rank"
+          ),
       prices: pricesByPlan.get(String(plan.id)) ?? []
     })),
 
@@ -271,10 +294,10 @@ export async function readLaunchConfigurationSnapshot(
 
     trial_policy: policies[0]
       ? {
-          enabled: safeInteger(
+          enabled: safeBooleanFlag(
             policies[0].enabled,
             "trial_enabled"
-          ) === 1,
+          ),
           trial_days: safeInteger(
             policies[0].trial_days,
             "trial_days"

@@ -63,6 +63,12 @@ export async function recordLaunchApprovalDecision(
   let transactionActive = false;
 
   try {
+    // Use UTC for the entire approval transaction.
+    // This changes only the acquired MySQL session.
+    await connection.query(
+      "SET SESSION time_zone = '+00:00'"
+    );
+
     await connection.beginTransaction();
     transactionActive = true;
 

@@ -9,7 +9,8 @@ import {
 import type { PoolConnection } from "mysql2/promise";
 
 const mocks = vi.hoisted(() => ({
-  readSnapshot: vi.fn()
+  readSnapshot: vi.fn(),
+  query: vi.fn()
 }));
 
 vi.mock(
@@ -35,7 +36,9 @@ import type {
   LaunchConfigurationSnapshot
 } from "../src/modules/products/product.launch.snapshot.js";
 
-const connection = {} as PoolConnection;
+const connection = {
+  query: mocks.query
+} as unknown as PoolConnection;
 const now = new Date("2026-10-31T13:00:00Z");
 
 function snapshot(): LaunchConfigurationSnapshot {
@@ -84,6 +87,11 @@ function snapshot(): LaunchConfigurationSnapshot {
 describe("Launch snapshot and readiness assessment", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+
+    mocks.query.mockResolvedValue([
+      [{ offset_minutes: 0 }],
+      []
+    ]);
   });
 
   it("reads configuration only once", async () => {
@@ -144,5 +152,41 @@ describe("Launch snapshot and readiness assessment", () => {
 
     expect(result.assessment.activation_enabled)
       .toBe(false);
+  });
+  it("blocks non-UTC database sessions", async () => {
+    mocks.query.mockResolvedValueOnce([
+      [{ offset_minutes: 330 }],
+      []
+    ]);
+
+    await expect(
+      readAssessedLaunchConfiguration(
+        connection,
+        25,
+        now
+      )
+    ).rejects.toThrow(
+      "LAUNCH_REQUIRES_UTC_SESSION"
+    );
+
+    expect(mocks.readSnapshot).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when timezone verification fails", async () => {
+    mocks.query.mockRejectedValueOnce(
+      new Error("TIMEZONE_QUERY_FAILED")
+    );
+
+    await expect(
+      readAssessedLaunchConfiguration(
+        connection,
+        25,
+        now
+      )
+    ).rejects.toThrow(
+      "TIMEZONE_QUERY_FAILED"
+    );
+
+    expect(mocks.readSnapshot).not.toHaveBeenCalled();
   });
 });

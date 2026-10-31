@@ -8,6 +8,7 @@ import {
 
 const mocks = vi.hoisted(() => ({
   getConnection: vi.fn(),
+  query: vi.fn(),
   beginTransaction: vi.fn(),
   execute: vi.fn(),
   commit: vi.fn(),
@@ -59,6 +60,7 @@ function setup(
   affectedRows = 1
 ) {
   mocks.getConnection.mockResolvedValue({
+    query: mocks.query,
     beginTransaction: mocks.beginTransaction,
     execute: mocks.execute,
     commit: mocks.commit,
@@ -76,6 +78,9 @@ function setup(
 describe("Launch approval transaction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+
+    mocks.query.mockResolvedValue([[], []]);
+
     mocks.readSnapshotHash.mockResolvedValue({
       hash: "a".repeat(64),
       assessment: {
@@ -432,5 +437,58 @@ describe("Launch approval transaction", () => {
 
     expect(mocks.readSnapshotHash).not.toHaveBeenCalled();
     expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+  it("sets UTC before beginning the approval transaction", async () => {
+    setup();
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result.status).toBe("RECORDED");
+
+    expect(mocks.query).toHaveBeenCalledWith(
+      "SET SESSION time_zone = '+00:00'"
+    );
+
+    expect(mocks.query).toHaveBeenCalledOnce();
+
+    expect(
+      mocks.query.mock.invocationCallOrder[0]
+    ).toBeLessThan(
+      mocks.beginTransaction.mock.invocationCallOrder[0]!
+    );
+
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+
+  it("fails closed when UTC session setup fails", async () => {
+    setup();
+
+    mocks.query.mockRejectedValueOnce(
+      new Error("UTC_SESSION_SETUP_FAILED")
+    );
+
+    await expect(
+      recordLaunchApprovalDecision(
+        "TEST_PRODUCT",
+        publicId,
+        "APPROVE",
+        2,
+        ["SUPER_ADMIN"]
+      )
+    ).rejects.toThrow(
+      "UTC_SESSION_SETUP_FAILED"
+    );
+
+    expect(mocks.beginTransaction).not.toHaveBeenCalled();
+    expect(mocks.execute).not.toHaveBeenCalled();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.rollback).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
   });
 });
