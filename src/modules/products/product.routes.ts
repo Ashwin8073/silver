@@ -1,4 +1,7 @@
-﻿import { Router } from "express";
+import {
+  getProductLaunchOverview
+} from "./product.launch.service.js";
+import { Router } from "express";
 
 import {
   requireStaff,
@@ -82,6 +85,65 @@ productsRouter.get(
   }
 );
 
+productsRouter.get(
+  "/:productCode/launch-overview",
+  async (req, res, next) => {
+    try {
+      const code = req.params.productCode;
+
+      if (
+        typeof code !== "string" ||
+        !productCodeRegex.test(code)
+      ) {
+        res.status(400).json({
+          success: false,
+          code: "INVALID_PRODUCT_CODE"
+        });
+        return;
+      }
+
+      const product = await getProduct(code);
+
+      if (!product) {
+        res.status(404).json({
+          success: false,
+          code: "PRODUCT_NOT_FOUND"
+        });
+        return;
+      }
+
+      const staff = res.locals.staff as StaffContext;
+
+      const allowed = await canReadProduct(
+        staff.id,
+        staff.roles,
+        product.id
+      );
+
+      if (!allowed) {
+        res.status(403).json({
+          success: false,
+          code: "PRODUCT_ACCESS_DENIED"
+        });
+        return;
+      }
+
+      const overview = await getProductLaunchOverview(
+        product.id
+      );
+
+      res.status(200).json({
+        success: true,
+        product_code: product.product_code,
+        product_status: product.status,
+        overview,
+        activation_enabled: false
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 productsRouter.get(
   "/:productCode",
   async (req, res, next) => {
