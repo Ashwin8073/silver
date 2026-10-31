@@ -282,4 +282,121 @@ describe("Product launch check configuration", () => {
     expect(mocks.commit).not.toHaveBeenCalled();
     expect(mocks.release).toHaveBeenCalledOnce();
   });
+  it("audits previous and new evidence hashes", async () => {
+    mockDraftProduct();
+
+    const oldEvidence = JSON.stringify({
+      schema_version: 1,
+      evidence_reference: "SEC-OLD-001",
+      evidence_summary: "Previous security review evidence"
+    });
+
+    mocks.execute.mockResolvedValueOnce([
+      [{
+        id: 7,
+        status: "PASSED",
+        details_json: oldEvidence
+      }],
+      []
+    ]);
+
+    await recordProductLaunchCheck(
+      baseInput,
+      2
+    );
+
+    const [auditSql, auditParams] =
+      mocks.execute.mock.calls[3]!;
+
+    expect(auditSql).toContain("INSERT INTO audit_logs");
+
+    const details = JSON.parse(auditParams[6]);
+
+    expect(details.previous_status).toBe("PASSED");
+    expect(details.new_status).toBe("PASSED");
+
+    expect(
+      details.previous_evidence_sha256
+    ).toMatch(/^[a-f0-9]{64}$/);
+
+    expect(
+      details.new_evidence_sha256
+    ).toMatch(/^[a-f0-9]{64}$/);
+
+    expect(
+      details.previous_evidence_sha256
+    ).not.toBe(
+      details.new_evidence_sha256
+    );
+
+    expect(details.evidence_changed).toBe(true);
+
+    expect(auditParams[6]).not.toContain(
+      "Previous security review evidence"
+    );
+
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+
+  it("audits evidence removal when a check is reset", async () => {
+    mockDraftProduct();
+
+    mocks.execute.mockResolvedValueOnce([
+      [{
+        id: 7,
+        status: "PASSED",
+        details_json: '{"reference":"old-review"}'
+      }],
+      []
+    ]);
+
+    await recordProductLaunchCheck(
+      {
+        ...baseInput,
+        status: "PENDING",
+        evidence: null,
+        attested_pass: false
+      },
+      2
+    );
+
+    const auditParams =
+      mocks.execute.mock.calls[3]![1];
+
+    const details = JSON.parse(auditParams[6]);
+
+    expect(
+      details.previous_evidence_sha256
+    ).toMatch(/^[a-f0-9]{64}$/);
+
+    expect(details.new_evidence_sha256).toBeNull();
+    expect(details.evidence_changed).toBe(true);
+
+    expect(mocks.commit).toHaveBeenCalledOnce();
+  });
+
+  it("rejects malformed stored evidence types", async () => {
+    mockDraftProduct();
+
+    mocks.execute.mockResolvedValueOnce([
+      [{
+        id: 7,
+        status: "PASSED",
+        details_json: { unexpected: "object" }
+      }],
+      []
+    ]);
+
+    await expect(
+      recordProductLaunchCheck(
+        baseInput,
+        2
+      )
+    ).rejects.toThrow(
+      "INVALID_STORED_LAUNCH_EVIDENCE"
+    );
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+  });
 });

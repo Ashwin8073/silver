@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import type {
   RowDataPacket
@@ -57,6 +57,7 @@ interface ProductRow extends RowDataPacket {
 interface CheckRow extends RowDataPacket {
   id: number;
   status: string;
+  details_json: string | null;
 }
 
 export class LaunchCheckInputError extends Error {
@@ -178,11 +179,29 @@ function encodeEvidence(
   });
 }
 
+function evidenceFingerprint(
+  detailsJson: string | null
+): string | null {
+  if (detailsJson === null) {
+    return null;
+  }
+
+  if (typeof detailsJson !== "string") {
+    throw new Error("INVALID_STORED_LAUNCH_EVIDENCE");
+  }
+
+  return createHash("sha256")
+    .update(detailsJson, "utf8")
+    .digest("hex");
+}
+
 async function writeAudit(
   connection: PoolConnection,
   staffId: number,
   input: RecordLaunchCheckInput,
-  previousStatus: string | null
+  previousStatus: string | null,
+  previousEvidenceSha256: string | null,
+  newEvidenceSha256: string | null
 ): Promise<void> {
   await connection.execute(
     [
@@ -205,6 +224,10 @@ async function writeAudit(
         previous_status: previousStatus,
         new_status: input.status,
         evidence_present: input.evidence !== null,
+        previous_evidence_sha256: previousEvidenceSha256,
+        new_evidence_sha256: newEvidenceSha256,
+        evidence_changed:
+          previousEvidenceSha256 !== newEvidenceSha256,
         attested_pass: input.attested_pass
       })
     ]
@@ -278,7 +301,7 @@ export async function recordProductLaunchCheck(
     const [existing] =
       await connection.execute<CheckRow[]>(
         [
-          "SELECT id, status",
+          "SELECT id, status, details_json",
           "FROM product_launch_checks",
           "WHERE product_id = ?",
           "  AND check_code = ?",
@@ -306,6 +329,14 @@ export async function recordProductLaunchCheck(
 
     const evidenceJson =
       encodeEvidence(input.evidence);
+
+    const previousEvidenceSha256 =
+      evidenceFingerprint(
+        oldCheck?.details_json ?? null
+      );
+
+    const newEvidenceSha256 =
+      evidenceFingerprint(evidenceJson);
 
     const passed =
       input.status === "PASSED";
@@ -345,7 +376,9 @@ export async function recordProductLaunchCheck(
       connection,
       staffId,
       input,
-      oldCheck?.status ?? null
+      oldCheck?.status ?? null,
+      previousEvidenceSha256,
+      newEvidenceSha256
     );
 
     await connection.commit();
