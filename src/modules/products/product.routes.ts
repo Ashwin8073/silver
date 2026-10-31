@@ -1,4 +1,7 @@
 import {
+  getProductLaunchEvidence
+} from "./product.launch.evidence.js";
+import {
   evaluateProductReadiness
 } from "./product.readiness.js";
 import {
@@ -135,11 +138,16 @@ productsRouter.get(
         product.id
       );
 
+      const evidence = await getProductLaunchEvidence(
+        product.id
+      );
+
       res.status(200).json({
         success: true,
         product_code: product.product_code,
         product_status: product.status,
         overview,
+        evidence,
         readiness: evaluateProductReadiness(overview),
         activation_enabled: false
       });
