@@ -1,4 +1,7 @@
 import {
+  evaluateLaunchEligibility
+} from "./product.launch.eligibility.js";
+import {
   getProductLaunchEvidence
 } from "./product.launch.evidence.js";
 import {
@@ -148,6 +151,7 @@ productsRouter.get(
         product_status: product.status,
         overview,
         evidence,
+        launch_eligibility: evaluateLaunchEligibility(evidence),
         readiness: evaluateProductReadiness(overview),
         activation_enabled: false
       });
