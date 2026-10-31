@@ -12,13 +12,18 @@ const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   commit: vi.fn(),
   rollback: vi.fn(),
-  release: vi.fn()
+  release: vi.fn(),
+  readSnapshotHash: vi.fn()
 }));
 
 vi.mock("../src/database/pool.js", () => ({
   pool: {
     getConnection: mocks.getConnection
   }
+}));
+
+vi.mock("../src/modules/products/product.launch.snapshot.repository.js", () => ({
+  readLaunchConfigurationHash: mocks.readSnapshotHash
 }));
 
 import {
@@ -71,6 +76,9 @@ function setup(
 describe("Launch approval transaction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mocks.readSnapshotHash.mockResolvedValue(
+      "a".repeat(64)
+    );
   });
 
   it("approves and audits in one transaction", async () => {
@@ -280,5 +288,76 @@ describe("Launch approval transaction", () => {
     expect(mocks.execute).toHaveBeenCalledTimes(2);
     expect(mocks.rollback).toHaveBeenCalledOnce();
     expect(mocks.commit).not.toHaveBeenCalled();
+  });
+  it("rejects an outdated configuration fingerprint", async () => {
+    setup();
+
+    mocks.readSnapshotHash.mockResolvedValueOnce(
+      "b".repeat(64)
+    );
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "APPROVE",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "DENIED",
+      reason: "STALE_PRODUCT_CONFIGURATION"
+    });
+
+    expect(mocks.execute).toHaveBeenCalledTimes(2);
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("rolls back when live configuration cannot be read", async () => {
+    setup();
+
+    mocks.readSnapshotHash.mockRejectedValueOnce(
+      new Error("CONFIGURATION_UNAVAILABLE")
+    );
+
+    await expect(
+      recordLaunchApprovalDecision(
+        "TEST_PRODUCT",
+        publicId,
+        "APPROVE",
+        2,
+        ["SUPER_ADMIN"]
+      )
+    ).rejects.toThrow("CONFIGURATION_UNAVAILABLE");
+
+    expect(mocks.rollback).toHaveBeenCalledOnce();
+    expect(mocks.commit).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("permits rejection even when configuration is stale", async () => {
+    setup();
+
+    mocks.readSnapshotHash.mockResolvedValueOnce(
+      "b".repeat(64)
+    );
+
+    const result = await recordLaunchApprovalDecision(
+      "TEST_PRODUCT",
+      publicId,
+      "REJECT",
+      2,
+      ["SUPER_ADMIN"]
+    );
+
+    expect(result).toEqual({
+      status: "RECORDED",
+      decision: "REJECTED"
+    });
+
+    expect(mocks.readSnapshotHash).not.toHaveBeenCalled();
+    expect(mocks.commit).toHaveBeenCalledOnce();
   });
 });

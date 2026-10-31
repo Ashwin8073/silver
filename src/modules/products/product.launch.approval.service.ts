@@ -3,6 +3,9 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { pool } from "../../database/pool.js";
 import {
+  readLaunchConfigurationHash
+} from "./product.launch.snapshot.repository.js";
+import {
   verifyLaunchRequestIntegrity
 } from "./product.launch.request-integrity.js";
 import {
@@ -116,6 +119,27 @@ export async function recordLaunchApprovalDecision(
         status: "DENIED",
         reason: integrity.reason
       };
+    }
+
+    if (action === "APPROVE") {
+      const currentConfigurationHash =
+        await readLaunchConfigurationHash(
+          connection,
+          product.id
+        );
+
+      if (
+        currentConfigurationHash !==
+        integrity.body.configuration_sha256
+      ) {
+        await connection.rollback();
+        transactionActive = false;
+
+        return {
+          status: "DENIED",
+          reason: "STALE_PRODUCT_CONFIGURATION"
+        };
+      }
     }
 
     const decision = evaluateLaunchApprovalAction(
