@@ -1,0 +1,73 @@
+﻿/* D-GATE Silver CRM — Design Tokens */
+/* Reference: Interactive UI/UX Prototype v2 */
+
+:root {
+    color-scheme: light;
+
+    /* Brand colors */
+    --color-graphite: #242234;
+    --color-violet: #6948DB;
+    --color-violet-dark: #5638C5;
+    --color-violet-light: #F0EBFF;
+    --color-copper: #C68A54;
+    --color-canvas: #F7F5F2;
+    --color-white: #FFFFFF;
+
+    /* Semantic colors */
+    --color-primary: var(--color-violet);
+    --color-primary-hover: var(--color-violet-dark);
+    --color-background: var(--color-canvas);
+    --color-surface: var(--color-white);
+    --color-text: var(--color-graphite);
+    --color-text-secondary: #6C6882;
+    --color-text-muted: #88849B;
+    --color-border: #E9E7EE;
+
+    /* Status colors */
+    --color-success: #21835D;
+    --color-danger: #D24E64;
+    --color-warning: #B77223;
+    --color-info: #4376CB;
+
+    /* Sidebar */
+    --sidebar-bg: #242234;
+    --sidebar-text: #C4BFD5;
+    --sidebar-active: #6948DB;
+    --sidebar-width: 245px;
+
+    /* Typography */
+    --font-family: "Inter", sans-serif;
+    --font-size-xs: 10px;
+    --font-size-sm: 12px;
+    --font-size-base: 13px;
+    --font-size-lg: 16px;
+    --font-size-xl: 20px;
+    --font-size-page-title: 26px;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+
+    /* Border radii */
+    --radius-sm: 7px;
+    --radius-md: 10px;
+    --radius-lg: 15px;
+    --radius-xl: 18px;
+
+    /* Shadows */
+    --shadow-card: 0 9px 26px rgba(39,31,69,0.045);
+    --shadow-modal: 0 18px 46px rgba(39,31,69,0.09);
+
+    /* Layout */
+    --topbar-height: 75px;
+    --page-max-width: 1660px;
+
+    /* Motion */
+    --transition-fast: 160ms ease;
+    --transition-normal: 220ms ease;
+}

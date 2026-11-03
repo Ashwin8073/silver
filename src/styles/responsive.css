@@ -1,0 +1,211 @@
+/* D-GATE Silver CRM — Responsive Design */
+/* Reference: Interactive UI/UX Prototype v2.0 */
+
+/* Large desktop */
+@media (max-width: 1350px) {
+    .sidebar {
+        width: 218px;
+    }
+
+    .topbar {
+        padding-inline: 19px;
+    }
+
+    .page {
+        padding: 23px 19px;
+    }
+
+    .metrics.six {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-main {
+        grid-template-columns: minmax(0, 1.2fr) minmax(300px, 1fr);
+    }
+}
+
+/* Tablet */
+@media (max-width: 1050px) {
+    .sidebar {
+        width: 205px;
+    }
+
+    .grid-main,
+    .grid-main.equal {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metrics.six {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+@media (max-width: 760px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        height: 100vh;
+        z-index: 75;
+        transform: translateX(-105%);
+        transition: transform var(--transition-normal);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-shade.open {
+        position: fixed;
+        display: block;
+        inset: 0;
+        background: rgba(28, 23, 52, 0.4);
+        z-index: 70;
+    }
+
+    .mobile-toggle {
+        display: grid;
+    }
+
+    .topbar {
+        height: 66px;
+        padding-inline: 12px;
+    }
+
+    .global-search {
+        width: 100%;
+        max-width: none;
+    }
+
+    .global-search kbd {
+        display: none;
+    }
+
+    .profile .user-meta,
+    .role-switch span {
+        display: none;
+    }
+
+    .top-actions {
+        gap: 6px;
+    }
+
+    .page {
+        padding: 18px 13px 36px;
+    }
+
+    .page-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .page-head h1 {
+        font-size: 23px;
+    }
+
+    .head-actions {
+        justify-content: flex-start;
+    }
+
+    .overview-strip {
+        padding: 17px;
+    }
+
+    .overview-strip h2 {
+        font-size: 18px;
+    }
+
+    .overview-strip .rightinfo {
+        display: none;
+    }
+
+    .metrics,
+    .metrics.six {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .metric {
+        min-height: 107px;
+        padding: 13px;
+    }
+
+    .metric .metric-number {
+        font-size: 22px;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .kanban {
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        overflow-x: auto;
+    }
+
+    .calendar-cell {
+        min-height: 67px;
+        padding: 4px;
+    }
+
+    .calendar-dow {
+        font-size: 9px;
+        padding: 2px;
+    }
+
+    .cal-event {
+        font-size: 8px;
+    }
+
+    .drawer-header {
+        padding: 18px;
+    }
+
+    .drawer-content {
+        padding: 17px;
+    }
+
+    .drawer-footer {
+        padding: 12px;
+    }
+
+    .dialog {
+        max-height: 95vh;
+    }
+
+    .table th,
+    .table td {
+        padding: 11px 9px;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .card-header {
+        padding: 15px;
+    }
+
+    .card-body {
+        padding: 0 15px 16px;
+    }
+
+    .doc-preview {
+        padding: 15px;
+    }
+}

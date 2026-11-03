@@ -1,0 +1,285 @@
+/*
+ * D-GATE Silver CRM — Topbar
+ * Reference: Interactive UI/UX Prototype v2.0
+ */
+
+/* Main header */
+
+.topbar {
+    height: var(--topbar-height);
+    padding: 0 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+
+    position: sticky;
+    top: 0;
+    z-index: 30;
+
+    background: var(--color-white);
+    border-bottom: 1px solid #EEEAF3;
+}
+
+/* Header left section */
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    flex: 1;
+    min-width: 0;
+}
+
+/* Global search */
+
+.global-search {
+    width: min(395px, 45vw);
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 0 12px;
+
+    background: #F8F7FA;
+    border: 1px solid #EFEDF3;
+    border-radius: 10px;
+
+    color: #8B879E;
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.global-search:focus-within {
+    border-color: #987DE7;
+    box-shadow: 0 0 0 3px rgba(105, 72, 219, 0.1);
+}
+
+.global-search input {
+    width: 100%;
+    min-width: 0;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+    color: var(--color-text);
+
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.global-search input::placeholder {
+    color: #938DA3;
+}
+
+.global-search input:disabled {
+    cursor: not-allowed;
+}
+
+.global-search kbd {
+    flex-shrink: 0;
+
+    padding: 2px 5px;
+
+    background: var(--color-white);
+    border: 1px solid #E8E4EF;
+    border-radius: 5px;
+
+    color: #A19BB4;
+    font-size: 10px;
+}
+
+/* Header right section */
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    flex-shrink: 0;
+}
+
+/* Development-only role preview */
+
+.role-switch {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 7px 8px;
+
+    background: #FBFAFF;
+    border: 1px solid #EAE5F3;
+    border-radius: 10px;
+}
+
+.role-switch span {
+    color: #938CA8;
+
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.role-switch select {
+    max-width: 145px;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+    color: #4D3488;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.role-switch:focus-within {
+    outline: 2px solid #B7A6F5;
+    outline-offset: 2px;
+}
+
+/* Icon buttons */
+
+.icon-button {
+    position: relative;
+
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    padding: 0;
+
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+
+    color: #665D82;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.icon-button:hover:not(:disabled) {
+    background: #F4F0FE;
+    border-color: #D8CEF3;
+}
+
+.icon-button:disabled {
+    opacity: 0.5;
+}
+
+/* Notification indicator */
+
+.notification-button {
+    position: relative;
+}
+
+.notif-dot {
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    width: 7px;
+    height: 7px;
+
+    background: #E75B75;
+    border: 1px solid var(--color-white);
+    border-radius: 50%;
+}
+
+/* User profile */
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.avatar {
+    width: 37px;
+    height: 37px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    background: linear-gradient(
+        145deg,
+        #E9DDFB,
+        #AC91ED
+    );
+
+    color: #5F3CAE;
+
+    font-size: 11px;
+    font-weight: 850;
+}
+
+.user-meta {
+    min-width: 0;
+}
+
+.user-meta strong {
+    display: block;
+
+    color: var(--color-text);
+
+    font-size: 11px;
+    font-weight: 750;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-meta small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #A29EAF;
+    font-size: 10px;
+}
+
+/* Mobile menu starts hidden on desktop */
+
+.mobile-toggle {
+    display: none;
+}
+
+/* Small mobile adjustments */
+
+@media (max-width: 400px) {
+    .top-actions {
+        gap: 5px;
+    }
+
+    .role-switch select {
+        max-width: 95px;
+        font-size: 10px;
+    }
+}
+
+/* Motion accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .global-search,
+    .icon-button {
+        transition: none;
+    }
+}

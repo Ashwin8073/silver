@@ -1,0 +1,434 @@
+/*
+ * D-GATE Silver CRM
+ * My Contacts Module Styles
+ *
+ * Uses existing theme tokens where available.
+ * No global style overrides.
+ */
+
+.contacts-page {
+    --contacts-ink: var(--color-text-primary, #242234);
+    --contacts-violet: var(--color-primary, #6948db);
+    --contacts-copper: var(--color-accent, #c68a54);
+    --contacts-canvas: var(--color-background, #f7f5f2);
+    --contacts-border: #e8e5ed;
+    --contacts-muted: #777483;
+
+    width: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
+    color: var(--contacts-ink);
+    font-family: inherit;
+}
+
+/* PAGE HEADER */
+
+.contacts-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.contacts-eyebrow {
+    margin: 0 0 10px;
+    color: var(--contacts-copper);
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.contacts-heading h1 {
+    margin: 0;
+    color: var(--contacts-ink);
+    font-size: clamp(26px, 2.5vw, 34px);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+}
+
+.contacts-heading > div > p:last-child {
+    margin: 10px 0 0;
+    max-width: 620px;
+    color: var(--contacts-muted);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+/* CREATE BUTTON */
+
+.contacts-create-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: var(--contacts-violet);
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color 180ms ease,
+        box-shadow 180ms ease,
+        transform 180ms ease;
+}
+
+.contacts-create-button:not(:disabled):hover {
+    background: #5836c2;
+    box-shadow: 0 7px 18px rgb(105 72 219 / 18%);
+    transform: translateY(-1px);
+}
+
+.contacts-create-button:disabled {
+    background: #e9e5f1;
+    color: #8d8799;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.contacts-create-button:focus-visible {
+    outline: 3px solid var(--contacts-copper);
+    outline-offset: 3px;
+}
+
+/* MAIN PANEL */
+
+.contacts-panel {
+    min-width: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid var(--contacts-border);
+    border-radius: 18px;
+    box-shadow: 0 5px 28px rgb(36 34 52 / 4%);
+}
+
+.contacts-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 23px 26px 19px;
+    border-bottom: 1px solid #f0edf3;
+}
+
+.contacts-panel-heading h2 {
+    margin: 0;
+    color: var(--contacts-ink);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.contacts-panel-heading p {
+    margin: 6px 0 0;
+    color: var(--contacts-muted);
+    font-size: 12px;
+}
+
+.contacts-panel-heading > svg {
+    flex: none;
+    color: var(--contacts-violet);
+}
+
+/* SEARCH AND FILTERS */
+
+.contacts-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 18px 26px;
+}
+
+.contacts-search,
+.contacts-status-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid var(--contacts-border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--contacts-muted);
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.contacts-search {
+    flex: 1 1 260px;
+    max-width: 410px;
+}
+
+.contacts-search:focus-within,
+.contacts-status-filter:focus-within {
+    border-color: var(--contacts-violet);
+    box-shadow: 0 0 0 3px rgb(105 72 219 / 10%);
+}
+
+.contacts-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--contacts-ink);
+    font: inherit;
+    font-size: 13px;
+}
+
+.contacts-search input::placeholder {
+    color: #9691a0;
+}
+
+.contacts-status-filter {
+    flex: 0 1 auto;
+}
+
+.contacts-status-filter select {
+    min-width: 135px;
+    max-width: 230px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--contacts-ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.contacts-status-filter:has(select:disabled) {
+    opacity: 0.6;
+}
+
+.contacts-status-filter select:disabled {
+    cursor: not-allowed;
+}
+
+/* DATA TABLE */
+
+.contacts-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.contacts-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-align: left;
+}
+
+.contacts-table thead {
+    background: #f8f7fa;
+}
+
+.contacts-table th {
+    padding: 15px 22px;
+    color: #777184;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.contacts-table td {
+    padding: 17px 22px;
+    border-top: 1px solid #f1eff4;
+    color: #4b4856;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.contacts-table tbody tr {
+    transition: background-color 150ms ease;
+}
+
+.contacts-table tbody tr:hover {
+    background: #faf9fd;
+}
+
+.contacts-table tbody td:first-child {
+    color: var(--contacts-ink);
+    font-weight: 650;
+}
+
+/* EMPTY STATES */
+
+.contacts-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 270px;
+    padding: 44px 24px;
+    text-align: center;
+}
+
+.contacts-empty > svg {
+    margin-bottom: 17px;
+    color: var(--contacts-violet);
+    opacity: 0.75;
+}
+
+.contacts-empty h3 {
+    margin: 0 0 8px;
+    color: var(--contacts-ink);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.contacts-empty p {
+    max-width: 390px;
+    margin: 0;
+    color: var(--contacts-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+    .contacts-heading {
+        gap: 18px;
+    }
+
+    .contacts-panel-heading,
+    .contacts-toolbar {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
+
+    .contacts-search {
+        max-width: none;
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .contacts-heading {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .contacts-create-button {
+        align-self: flex-start;
+    }
+
+    .contacts-panel {
+        border-radius: 14px;
+    }
+
+    .contacts-panel-heading {
+        padding: 19px 16px;
+    }
+
+    .contacts-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+    }
+
+    .contacts-search,
+    .contacts-status-filter {
+        width: 100%;
+        max-width: none;
+        flex: none;
+    }
+
+    .contacts-status-filter select {
+        flex: 1;
+        max-width: none;
+    }
+
+    .contacts-table th,
+    .contacts-table td {
+        padding: 14px 16px;
+    }
+
+    .contacts-empty {
+        min-height: 240px;
+        padding: 35px 20px;
+    }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+    .contacts-page *,
+    .contacts-page *::before,
+    .contacts-page *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* CONTACT RECORD ACTION */
+
+.contacts-record-link {
+    display: inline;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--contacts-violet);
+    font: inherit;
+    font-weight: 650;
+    line-height: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    transition: color 160ms ease;
+}
+
+.contacts-record-link:hover {
+    color: #5836c2;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.contacts-record-link:focus-visible {
+    outline: 3px solid var(--contacts-copper);
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+/* KEEP TABLE READABLE WITH CUSTOM COLUMNS */
+
+.contacts-table-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: #d8d2e1 transparent;
+}
+
+.contacts-table td {
+    vertical-align: middle;
+}
+
+.contacts-table td button {
+    overflow-wrap: anywhere;
+}
+
+/* MOBILE CONTACT DISPLAY */
+
+@media (max-width: 600px) {
+    .contacts-record-link {
+        min-height: 24px;
+    }
+}

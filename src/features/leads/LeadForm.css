@@ -1,0 +1,357 @@
+/*
+ * D-GATE Silver CRM — Dynamic Lead Form
+ * Reference: Interactive UI/UX Prototype v2.0
+ */
+
+.lead-form {
+    width: 100%;
+    min-width: 0;
+
+    background: var(--color-white);
+    color: var(--color-text);
+
+    font-family: var(--font-family);
+}
+
+/* Header */
+
+.lead-form-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+
+    padding: 22px 26px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.lead-form-header h2 {
+    margin: 0;
+
+    color: var(--color-graphite);
+
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+
+.lead-form-header p {
+    margin: 8px 0 0;
+
+    color: var(--color-text-secondary);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.lead-form-close {
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    padding: 0;
+
+    background: #F8F7FA;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    color: var(--color-text-secondary);
+}
+
+.lead-form-close:hover:not(:disabled) {
+    background: var(--color-violet-light);
+    color: var(--color-violet);
+}
+
+/* Dynamic field grid */
+
+.lead-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 21px 22px;
+    padding: 26px;
+}
+
+.lead-form-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+
+    min-width: 0;
+}
+
+.lead-form-full {
+    grid-column: 1 / -1;
+}
+
+/* Labels */
+
+.lead-form-field label {
+    color: var(--color-graphite);
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.lead-form-field label span {
+    color: var(--color-danger);
+}
+
+/* Text inputs, dropdowns and multiline inputs */
+
+.lead-form-field input:not([type="checkbox"]),
+.lead-form-field select,
+.lead-form-field textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 43px;
+
+    padding: 11px 13px;
+
+    background: var(--color-white);
+    border: 1px solid #E4E0EA;
+    border-radius: var(--radius-md);
+
+    color: var(--color-text);
+
+    font-family: var(--font-family);
+    font-size: 12px;
+    line-height: 1.5;
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.lead-form-field textarea {
+    min-height: 108px;
+    resize: vertical;
+}
+
+.lead-form-field input::placeholder,
+.lead-form-field textarea::placeholder {
+    color: #A19BAF;
+}
+
+.lead-form-field input:not([type="checkbox"]):focus,
+.lead-form-field select:focus,
+.lead-form-field textarea:focus {
+    outline: none;
+
+    border-color: var(--color-violet);
+
+    box-shadow: 0 0 0 3px rgba(105, 72, 219, 0.1);
+}
+
+.lead-form-field input:disabled,
+.lead-form-field select:disabled,
+.lead-form-field textarea:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Checkbox */
+
+.lead-form-field input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+
+    margin: 3px 0;
+
+    accent-color: var(--color-violet);
+    cursor: pointer;
+}
+
+.lead-form-field input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: 3px;
+}
+
+/* Description and validation */
+
+.lead-form-field small {
+    color: var(--color-text-muted);
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.lead-form-field [aria-invalid="true"] {
+    border-color: var(--color-danger);
+}
+
+.lead-form-field .lead-form-error,
+.lead-form > .lead-form-error {
+    color: var(--color-danger);
+
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.lead-form > .lead-form-error {
+    margin: 0;
+    padding: 0 26px 15px;
+}
+
+/* No configured fields */
+
+.lead-form-empty {
+    margin: 26px;
+    padding: 32px 20px;
+
+    background: #FBFAFD;
+    border: 1px dashed #E5E0EE;
+    border-radius: var(--radius-md);
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Footer actions */
+
+.lead-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    box-shadow: 0 -8px 20px rgba(39, 31, 69, 0.06);
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 11px;
+
+    padding: 18px 26px;
+
+    background: #FCFBFE;
+    border-top: 1px solid var(--color-border);
+}
+
+.lead-form-cancel,
+.lead-form-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 41px;
+    padding: 10px 18px;
+
+    border-radius: var(--radius-md);
+
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 750;
+
+    transition:
+        background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.lead-form-cancel {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+
+    color: var(--color-text-secondary);
+}
+
+.lead-form-cancel:hover:not(:disabled) {
+    background: #F5F2FA;
+}
+
+.lead-form-save {
+    background: var(--color-violet);
+    border: 1px solid var(--color-violet);
+
+    color: var(--color-white);
+}
+
+.lead-form-save:hover:not(:disabled) {
+    background: var(--color-violet-dark);
+    transform: translateY(-1px);
+}
+
+.lead-form-cancel:disabled,
+.lead-form-save:disabled,
+.lead-form-close:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.lead-form-cancel:focus-visible,
+.lead-form-save:focus-visible,
+.lead-form-close:focus-visible {
+    outline: 3px solid #BAA8F6;
+    outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 850px) {
+    .lead-form-header {
+        padding: 20px;
+    }
+
+    .lead-form-grid {
+        gap: 18px;
+        padding: 20px;
+    }
+
+    .lead-form-actions {
+        padding: 16px 20px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 550px) {
+    .lead-form-header {
+        padding: 18px;
+    }
+
+    .lead-form-header h2 {
+        font-size: 17px;
+    }
+
+    .lead-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+
+        gap: 17px;
+        padding: 18px;
+    }
+
+    .lead-form-full {
+        grid-column: auto;
+    }
+
+    .lead-form-actions {
+        padding: 16px 18px;
+    }
+
+    .lead-form-empty {
+        margin: 18px;
+    }
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+    .lead-form-field input,
+    .lead-form-field select,
+    .lead-form-field textarea,
+    .lead-form-cancel,
+    .lead-form-save {
+        transition: none;
+    }
+}

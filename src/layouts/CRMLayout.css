@@ -1,0 +1,131 @@
+/*
+ * D-GATE Silver CRM — Application Layout
+ * Reference: Interactive UI/UX Prototype v2.0
+ */
+
+/* Application shell */
+
+.app-shell {
+    display: flex;
+    align-items: stretch;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    background: var(--color-background);
+}
+
+/* Main workspace */
+
+.work-area {
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    background: var(--color-canvas);
+}
+
+/* Sidebar placement */
+
+.app-shell > .sidebar {
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+/* Topbar placement */
+
+.work-area > .topbar {
+    flex-shrink: 0;
+    width: 100%;
+}
+
+/* Main content */
+
+.work-area > .page {
+    flex: 1;
+
+    width: 100%;
+    max-width: var(--page-max-width);
+
+    margin: 0 auto;
+    padding: 26px 28px 38px;
+
+    background: transparent;
+}
+
+/* Keyboard accessibility */
+
+.work-area > .page:focus {
+    outline: none;
+}
+
+/* Large tablet */
+
+@media (max-width: 1350px) {
+    .work-area > .page {
+        padding: 24px 22px 32px;
+    }
+}
+
+/* Tablets */
+
+@media (max-width: 1050px) {
+    .work-area > .page {
+        padding: 22px 20px 30px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 760px) {
+    .app-shell {
+        display: block;
+    }
+
+    .work-area {
+        width: 100%;
+        min-height: 100dvh;
+    }
+
+    .work-area > .page {
+        padding: 18px 14px 28px;
+    }
+
+    .sidebar-shade.open {
+        display: block;
+
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+
+        width: 100%;
+        height: 100%;
+
+        background: rgba(17, 14, 28, 0.55);
+        border: 0;
+
+        cursor: pointer;
+    }
+
+    .app-shell > .sidebar {
+        z-index: 50;
+    }
+
+    .work-area > .topbar {
+        z-index: 30;
+    }
+}
+
+/* Small phones */
+
+@media (max-width: 400px) {
+    .work-area > .page {
+        padding: 15px 12px 24px;
+    }
+}

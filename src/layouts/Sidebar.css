@@ -1,0 +1,253 @@
+/*
+ * D-GATE Silver CRM — Sidebar
+ * Reference: Interactive UI/UX Prototype v2.0
+ */
+
+.sidebar {
+    width: var(--sidebar-width);
+    flex: none;
+    display: flex;
+    flex-direction: column;
+
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    height: 100vh;
+    height: 100dvh;
+
+    padding: 21px 12px 13px;
+
+    background: linear-gradient(
+        180deg,
+        #272337 0%,
+        #221E32 70%,
+        #1C1A2C 100%
+    );
+
+    color: var(--sidebar-text);
+}
+
+/* Brand identity */
+
+.sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px 20px;
+    color: var(--color-white);
+}
+
+.sidebar .logo {
+    width: 39px;
+    height: 39px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: linear-gradient(
+        140deg,
+        #8B6CF5,
+        #6441CF
+    );
+
+    box-shadow: 0 9px 22px rgba(91, 65, 214, 0.3);
+
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.sidebar .logo span {
+    color: #C2B4FF;
+}
+
+.sidebar .brand-title {
+    font-size: 15px;
+    font-weight: 850;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.sidebar .brand-sub {
+    margin-top: 2px;
+
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 2.2px;
+
+    text-transform: uppercase;
+    color: #A5A0BB;
+}
+
+/* Navigation */
+
+.sidebar .snav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-bottom: 10px;
+}
+
+.sidebar .nav-head {
+    padding: 16px 12px 7px;
+
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 1.9px;
+
+    text-transform: uppercase;
+    color: #847E9F;
+}
+
+.sidebar .nav-item {
+    width: 100%;
+    min-height: 39px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin: 1px 0;
+    padding: 10px 12px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: transparent;
+    color: #C9C5D6;
+
+    font-size: 12px;
+    font-weight: 570;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.sidebar .nav-item svg {
+    flex-shrink: 0;
+    color: #AFA9C8;
+}
+
+.sidebar .nav-item span {
+    min-width: 0;
+}
+
+.sidebar .nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-white);
+}
+
+.sidebar .nav-item.active {
+    background: linear-gradient(
+        105deg,
+        #6948DB,
+        #7656EB
+    );
+
+    box-shadow: 0 7px 16px rgba(95, 65, 199, 0.21);
+
+    color: var(--color-white);
+    font-weight: 760;
+}
+
+.sidebar .nav-item.active svg {
+    color: var(--color-white);
+}
+
+.sidebar .nav-item:focus-visible,
+.sidebar .side-plan-link:focus-visible {
+    outline: 2px solid #C2B4FF;
+    outline-offset: 2px;
+}
+
+/* Sidebar footer */
+
+.sidebar .side-foot {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 6px 0;
+}
+
+.sidebar .side-plan {
+    padding: 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar .plan-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--color-white);
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.sidebar .side-plan p {
+    margin-top: 5px;
+
+    color: #AAA4C0;
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.sidebar .side-plan-link {
+    width: 100%;
+    min-height: 31px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    margin-top: 10px;
+    padding: 7px 9px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.11);
+    color: var(--color-white);
+
+    font-size: 10px;
+    font-weight: 750;
+
+    transition: background var(--transition-fast);
+}
+
+.sidebar .side-plan-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* Mobile overlay — breakpoint handled in responsive.css */
+
+.sidebar-shade {
+    display: none;
+    border: 0;
+    padding: 0;
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar .nav-item,
+    .sidebar .side-plan-link {
+        transition: none;
+    }
+}

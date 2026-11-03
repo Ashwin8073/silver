@@ -1,0 +1,77 @@
+﻿/* D-GATE Silver CRM — Global Typography */
+/* Reference: Interactive UI/UX Prototype v2 */
+
+@import "@fontsource-variable/inter/index.css";
+
+:root {
+    --font-family: "Inter Variable", "Inter", sans-serif;
+}
+
+html {
+    font-family: var(--font-family);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    line-height: 1.53;
+}
+
+button,
+input,
+select,
+textarea,
+table {
+    font-family: var(--font-family);
+    font-size: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-family);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.45px;
+}
+
+h1 {
+    font-size: var(--font-size-page-title);
+}
+
+h2 {
+    font-size: var(--font-size-xl);
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+}
+
+p {
+    line-height: 1.53;
+}
+
+strong,
+b {
+    font-weight: 750;
+}
+
+small {
+    font-size: var(--font-size-xs);
+}
+
+button {
+    font-weight: 600;
+}
+
+label {
+    font-weight: 650;
+}
