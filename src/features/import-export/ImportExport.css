@@ -1,0 +1,496 @@
+/* D-GATE Silver CRM - Import / Export */
+
+.import-export-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 32px;
+  box-sizing: border-box;
+  color: #242234;
+  font-family: inherit;
+}
+
+.import-export-page *,
+.import-export-page *::before,
+.import-export-page *::after {
+  box-sizing: border-box;
+}
+
+/* Header */
+
+.import-export-page__header {
+  margin-bottom: 30px;
+}
+
+.import-export-page__eyebrow {
+  margin: 0 0 14px;
+  color: #c68a54;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.import-export-page__header h1 {
+  margin: 0;
+  color: #242234;
+  font-size: clamp(30px, 2.5vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+
+.import-export-page__description {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: #777287;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* Import and Export Action Cards */
+
+.import-export-page__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.import-export-page__action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 258px;
+  gap: 18px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e9e5ed;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(36, 34, 52, 0.025);
+}
+
+.import-export-page__action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  color: #6948db;
+  background: #f1edfd;
+  border-radius: 14px;
+}
+
+.import-export-page__action-card > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.import-export-page__action-card h2 {
+  margin: 0;
+  color: #242234;
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.import-export-page__action-card p {
+  max-width: 500px;
+  margin: 10px 0 0;
+  color: #827d90;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Action Buttons */
+
+.import-export-page__import-button,
+.import-export-page__export-button,
+.import-export-page__view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 43px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.import-export-page__import-button {
+  color: #ffffff;
+  background: #6948db;
+}
+
+.import-export-page__import-button:hover:not(:disabled) {
+  background: #5737c6;
+}
+
+.import-export-page__export-button,
+.import-export-page__view-button {
+  color: #6948db;
+  background: #ffffff;
+  border-color: #e6e1ef;
+}
+
+.import-export-page__export-button:hover:not(:disabled),
+.import-export-page__view-button:hover:not(:disabled) {
+  background: #f4f0ff;
+  border-color: #b8a7f0;
+}
+
+.import-export-page__view-button {
+  min-height: 34px;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.import-export-page button:disabled {
+  color: #a7a3b1;
+  background: #f2f0f4;
+  border-color: #f2f0f4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.import-export-page button:focus-visible {
+  outline: 3px solid rgba(105, 72, 219, 0.45);
+  outline-offset: 3px;
+}
+
+/* Transfer History Card */
+
+.import-export-page__section {
+  min-width: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e9e5ed;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(36, 34, 52, 0.025);
+}
+
+.import-export-page__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 27px 30px;
+  border-bottom: 1px solid #f0edf2;
+}
+
+.import-export-page__section-heading > div {
+  min-width: 0;
+}
+
+.import-export-page__section-heading h2 {
+  margin: 0;
+  color: #242234;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.import-export-page__section-heading p {
+  margin: 7px 0 0;
+  color: #827d90;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.import-export-page__section-heading > svg {
+  flex-shrink: 0;
+  color: #6948db;
+}
+
+.import-export-page__record-count {
+  display: inline-block;
+  margin-top: 8px;
+  color: #6948db;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Search and Filters */
+
+.import-export-page__toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(200px, 1fr)
+    minmax(160px, 205px)
+    minmax(160px, 205px);
+  align-items: center;
+  gap: 14px;
+  padding: 20px 28px;
+  border-bottom: 1px solid #f0edf2;
+}
+
+.import-export-page__search,
+.import-export-page__filter {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 46px;
+  gap: 11px;
+  padding: 0 14px;
+  color: #958fa3;
+  background: #ffffff;
+  border: 1px solid #e8e4ee;
+  border-radius: 11px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.import-export-page__search:focus-within,
+.import-export-page__filter:focus-within {
+  border-color: #6948db;
+  box-shadow: 0 0 0 3px rgba(105, 72, 219, 0.1);
+}
+
+.import-export-page__search > svg,
+.import-export-page__filter > svg {
+  flex-shrink: 0;
+}
+
+.import-export-page__search input,
+.import-export-page__filter select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  color: #242234;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 13px;
+}
+
+.import-export-page__search input::placeholder {
+  color: #a19bab;
+}
+
+.import-export-page__filter select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* Transfer History Table */
+
+.import-export-page__table-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc4dc transparent;
+}
+
+.import-export-page__table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.import-export-page__table th {
+  padding: 17px 24px;
+  color: #777087;
+  background: #f8f7fa;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.import-export-page__table td {
+  padding: 19px 24px;
+  color: #615b6f;
+  border-top: 1px solid #f0edf2;
+  font-size: 13px;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+
+.import-export-page__table tbody tr:hover {
+  background: #faf9ff;
+}
+
+.import-export-page__table th:last-child,
+.import-export-page__table td:last-child {
+  text-align: right;
+}
+
+.import-export-page__record-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 155px;
+  gap: 5px;
+}
+
+.import-export-page__record-main strong {
+  color: #242234;
+  font-size: 13px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.import-export-page__record-main span {
+  max-width: 370px;
+  color: #827d90;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* Empty State */
+
+.import-export-page__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 45px 24px;
+  text-align: center;
+}
+
+.import-export-page__empty-state > svg {
+  margin-bottom: 18px;
+  color: #8d70f0;
+}
+
+.import-export-page__empty-state h3 {
+  margin: 0 0 10px;
+  color: #242234;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.import-export-page__empty-state p {
+  max-width: 470px;
+  margin: 0;
+  color: #827d90;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Accessible Hidden Labels */
+
+.import-export-page__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tablet */
+
+@media (max-width: 1100px) {
+  .import-export-page {
+    padding: 26px;
+  }
+
+  .import-export-page__toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .import-export-page__search {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 760px) {
+  .import-export-page {
+    padding: 20px 16px;
+  }
+
+  .import-export-page__header h1 {
+    font-size: 29px;
+  }
+
+  .import-export-page__actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .import-export-page__action-card {
+    min-height: 0;
+    padding: 23px 20px;
+    border-radius: 16px;
+  }
+
+  .import-export-page__import-button,
+  .import-export-page__export-button {
+    width: 100%;
+  }
+
+  .import-export-page__section {
+    border-radius: 16px;
+  }
+
+  .import-export-page__section-heading {
+    padding: 21px 20px;
+  }
+
+  .import-export-page__toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .import-export-page__search {
+    grid-column: auto;
+  }
+
+  .import-export-page__table {
+    min-width: 900px;
+  }
+
+  .import-export-page__empty-state {
+    min-height: 240px;
+    padding: 36px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .import-export-page__header h1 {
+    font-size: 26px;
+  }
+
+  .import-export-page__section-heading h2 {
+    font-size: 18px;
+  }
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .import-export-page *,
+  .import-export-page *::before,
+  .import-export-page *::after {
+    transition: none !important;
+  }
+}

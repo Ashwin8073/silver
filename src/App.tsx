@@ -1,5 +1,27 @@
 import CalendarPage from './features/calendar/CalendarPage'
 import './features/calendar/Calendar.css'
+import EmployeesPage from './features/employees/EmployeesPage'
+import './features/employees/Employees.css'
+import ReportsPage from './features/reports/ReportsPage'
+import './features/reports/Reports.css'
+import ProductsPage from './features/products/ProductsPage'
+import './features/products/Products.css'
+import QuotationsPage from './features/quotations/QuotationsPage'
+import './features/quotations/Quotations.css'
+import NegotiationsPage from './features/negotiations/NegotiationsPage'
+import './features/negotiations/Negotiations.css'
+import PurchaseOrdersPage from './features/purchase-orders/PurchaseOrdersPage'
+import './features/purchase-orders/PurchaseOrders.css'
+import InvoicesPage from './features/invoices/InvoicesPage'
+import './features/invoices/Invoices.css'
+import PaymentsPage from './features/payments/PaymentsPage'
+import './features/payments/Payments.css'
+import ImportExportPage from './features/import-export/ImportExportPage'
+import './features/import-export/ImportExport.css'
+import AiCopilotPage from './features/ai-copilot/AiCopilotPage'
+import './features/ai-copilot/AiCopilot.css'
+import SettingsPage from './features/settings/SettingsPage'
+import './features/settings/Settings.css'
 import TasksPage from './features/tasks/TasksPage'
 import './features/tasks/Tasks.css'
 import OpportunitiesPage from './features/opportunities/OpportunitiesPage'
@@ -169,6 +191,17 @@ function App() {
                     <Route path="/opportunities" element={<OpportunitiesPage />} />
                     <Route path="/tasks" element={<TasksPage />} />
                     <Route path="/calendar" element={<CalendarPage />} />
+                    <Route path="/employees" element={<EmployeesPage />} />
+                    <Route path="/reports" element={<ReportsPage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/quotations" element={<QuotationsPage />} />
+                    <Route path="/negotiations" element={<NegotiationsPage />} />
+                    <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+                    <Route path="/invoices" element={<InvoicesPage />} />
+                    <Route path="/payments" element={<PaymentsPage />} />
+                    <Route path="/import-export" element={<ImportExportPage />} />
+                    <Route path="/ai-copilot" element={<AiCopilotPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route
                         path="/leads"
                         element={<LeadsPage />}
